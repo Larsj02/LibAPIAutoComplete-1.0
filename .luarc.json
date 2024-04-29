@@ -1,0 +1,13 @@
+{
+  "diagnostics.disable": [
+    "lowercase-global"
+  ],
+  "diagnostics.globals": [
+    "IndentationLib",
+    "WowLua"
+  ],
+  "runtime.version": "Lua 5.1",
+  "workspace.ignoreDir": [
+    ".vscode"
+  ]
+}
