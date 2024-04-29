@@ -2,11 +2,11 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\..\FrameXML\UI_shared.xsd">
 
-  <Frame name="APILineTemplate" mixin="APILineMixin" virtual="true">
+  <Frame name="APIAutoCompleteLineTemplate" mixin="APIAutoCompleteLineMixin" virtual="true">
     <Size y="20"/>
     <Frames>
       <Button parentKey="button" setAllPoints="true">
-        <ButtonText font="Interface\AddOns\WeakAuras\Media\Fonts\FiraMono-Medium.ttf">
+        <ButtonText>
           <Anchors>
            <Anchor point="LEFT"/>
           </Anchors>

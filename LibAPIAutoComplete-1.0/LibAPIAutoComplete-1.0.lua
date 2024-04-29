@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "APIDoc-1.0", 1
+local MAJOR, MINOR = "LibAPIAutoComplete-1.0", 1
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -40,7 +40,7 @@ local function Init()
   scrollBar:Hide()
 
   local view = CreateScrollBoxListLinearView()
-  view:SetElementInitializer("APILineTemplate", function(frame, elementData)
+  view:SetElementInitializer("APIAutoCompleteLineTemplate", function(frame, elementData)
     frame:Init(elementData)
   end)
   ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
@@ -194,7 +194,8 @@ function lib:UpdateWidget(editbox)
     local height = math.min(lines, maxLinesShown) * 20
     local width = 0
     local hiddenString = editbox.APIDoc_hiddenString
-    hiddenString:SetFontObject(editbox:GetFontObject())
+    local fontObject = editbox:GetFontObject()
+    hiddenString:SetFontObject(fontObject)
     for _, elementData in self.data:Enumerate() do
       hiddenString:SetText(elementData.name)
       width = math.max(width, hiddenString:GetStringWidth())
@@ -208,6 +209,9 @@ function lib:UpdateWidget(editbox)
     -- show
     self.scrollBox:SetParent(editbox)
     self.scrollBar:SetParent(editbox)
+    self.scrollBox:ForEachFrame(function(frame)
+      frame.button:SetNormalFontObject(fontObject)
+    end)
     self.scrollBox:Show()
     self.scrollBar:SetShown(lines > maxLinesShown)
   end
@@ -327,8 +331,8 @@ local function hideTooltip(self)
   GameTooltip:ClearLines()
 end
 
-APILineMixin = {}
-function APILineMixin:Init(elementData)
+APIAutoCompleteLineMixin = {}
+function APIAutoCompleteLineMixin:Init(elementData)
   self.name = elementData.name
   self.editor = elementData.editor
   self.apiInfo = elementData.apiInfo
