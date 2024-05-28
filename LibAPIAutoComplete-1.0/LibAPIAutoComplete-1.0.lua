@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibAPIAutoComplete-1.0", 1
+local MAJOR, MINOR = "LibAPIAutoComplete-1.0", 2
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -224,9 +224,9 @@ local function OnClickCallback(self)
 end
 
 ---@param editbox EditBox
----@return currentWord string
----@return startPosition integer
----@return endPosition integer
+---@return string currentWord
+---@return integer startPosition
+---@return integer endPosition
 function lib:GetWord(editbox)
   -- get cursor position
   local cursorPosition = editbox:GetCursorPosition()
@@ -242,7 +242,7 @@ function lib:GetWord(editbox)
   end
 
   -- get end position of current word
-  local endPosition = cursorPosition
+  local endPosition = startPosition
   while endPosition + 1 < #text and text:sub(endPosition + 1, endPosition + 1):find("[%w%.%_]") do
     endPosition = endPosition + 1
   end
@@ -268,8 +268,8 @@ function lib:SetWord(editbox, word)
   end
 
   -- get end position of current word
-  local endPosition = cursorPosition
-  while endPosition < #text and text:sub(endPosition + 1, endPosition + 1):find("[%w%.%_]") do
+  local endPosition = startPosition
+  while endPosition + 1 < #text and text:sub(endPosition + 1, endPosition + 1):find("[%w%.%_]") do
     endPosition = endPosition + 1
   end
 
@@ -291,13 +291,12 @@ function lib:SetWord(editbox, word)
         table.insert(oldFuncArgs, arg)
       end
       -- move endPosition
-      endPosition = endPosition + #currentWordArgs + 3
+      endPosition = endPosition + #currentWordArgs + 2
     end
   end
 
   -- replace replacement word's args with args from current word
   if funcName then
-    local newWord = funcName .. "("
     local concatArgs = {}
     for i = 1, math.max(#funcArgs, #oldFuncArgs) do
       concatArgs[i] = oldFuncArgs[i] or funcArgs[i]
@@ -306,7 +305,7 @@ function lib:SetWord(editbox, word)
   end
 
   -- replace word
-  text = text:sub(1, startPosition - 1) .. word .. text:sub(endPosition, #text)
+  text = text:sub(1, startPosition - 1) .. word .. text:sub(endPosition + 1, #text)
   editbox:SetText(text)
 
   -- move cursor at end of word or start of parenthese
