@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibAPIAutoComplete-1.0", 2
+local MAJOR, MINOR = "LibAPIAutoComplete-1.0", 3
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -219,7 +219,12 @@ end
 
 local function OnClickCallback(self)
   local editbox = self:GetParent():GetParent():GetParent():GetParent()
-  local name = IndentationLib.stripWowColors(self:GetParent().name)
+  local name
+  if IndentationLib then
+    name = IndentationLib.stripWowColors(self:GetParent().name)
+  elseif WowLua and WowLua.indent then
+    name = WowLua.indent.stripWowColors(self:GetParent().name)
+  end
   lib:SetWord(editbox, name)
 end
 
