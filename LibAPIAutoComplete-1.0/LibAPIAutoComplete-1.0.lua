@@ -393,6 +393,11 @@ function APIAutoCompleteLineMixin:Init(elementData)
   self:SetScript("OnClick", OnClickCallback)
   self:SetScript("OnEnter", showTooltip)
   self:SetScript("OnLeave", hideTooltip)
+  local fontString = self:GetFontString()
+  fontString:ClearAllPoints()
+  fontString:SetPoint("LEFT")
+  fontString:SetTextHeight(12)
+  fontString:SetTextColor(0.973, 0.902, 0.581)
 end
 
 function APIAutoCompleteLineMixin:SetSelected(selected)
