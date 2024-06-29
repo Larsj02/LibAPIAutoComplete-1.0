@@ -44,12 +44,54 @@ local function Init()
     frame:Init(elementData)
   end)
   ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
+  local selectionBehaviour = ScrollUtil.AddSelectionBehavior(scrollBox, SelectionBehaviorFlags.Deselectable, SelectionBehaviorFlags.Intrusive)
+  selectionBehaviour:RegisterCallback(SelectionBehaviorMixin.Event.OnSelectionChanged, function(o, elementData, selected)
+    local elementFrame = scrollBox:FindFrame(elementData)
+    elementFrame:SetSelected(selected)
+
+    if selected and lib.editbox then
+      local maxLinesShown = config[lib.editbox].maxLinesShown
+      local index = lib.data:FindIndex(elementData)
+      local percent = (index - maxLinesShown / 2)  / (lib.data:GetSize() - maxLinesShown)
+      if percent < 0 then
+        percent = 0
+      elseif percent > 1 then
+        percent = 1
+      end
+      scrollBar:SetScrollPercentage(percent)
+    end
+  end)
 
   lib.data = CreateDataProvider()
   scrollBox:SetDataProvider(lib.data)
 
   lib.scrollBar = scrollBar
   lib.scrollBox = scrollBox
+  lib.selectionBehaviour = selectionBehaviour
+
+  scrollBox.selectionBehaviour = selectionBehaviour
+
+  scrollBox:SetScript("OnKeyDown", function(self, key)
+    if key == "DOWN" then
+      lib.scrollBox:SetPropagateKeyboardInput(false)
+      self.selectionBehaviour:SelectNextElementData()
+    elseif key == "UP" then
+      self.selectionBehaviour:SelectPreviousElementData()
+    elseif key == "ENTER" then
+      lib.scrollBox:SetPropagateKeyboardInput(false)
+      local selectedElementData = self.selectionBehaviour:GetFirstSelectedElementData()
+      local elementFrame = scrollBox:FindFrame(selectedElementData)
+      elementFrame:Insert()
+    elseif key == "ESCAPE" then
+      lib.scrollBox:SetPropagateKeyboardInput(false)
+      lib.data:Flush()
+      lib:UpdateWidget(lib.editbox)
+    else
+      lib.scrollBox:SetPropagateKeyboardInput(true)
+      lib.data:Flush()
+      lib:UpdateWidget(lib.editbox)
+    end
+  end)
 end
 
 ---@private
@@ -187,6 +229,7 @@ function lib:UpdateWidget(editbox)
   if self.data:IsEmpty() then
     self.scrollBox:Hide()
     self.scrollBar:Hide()
+    self.editbox = nil
   else
     -- fix size
     local maxLinesShown = config[editbox].maxLinesShown
@@ -214,6 +257,8 @@ function lib:UpdateWidget(editbox)
     end)
     self.scrollBox:Show()
     self.scrollBar:SetShown(lines > maxLinesShown)
+    self.selectionBehaviour:SelectFirstElementData()
+    self.editbox = editbox
   end
 end
 
@@ -247,13 +292,13 @@ function lib:GetWord(editbox)
   end
 
   -- get end position of current word
-  local endPosition = startPosition
-  while endPosition + 1 < #text and text:sub(endPosition + 1, endPosition + 1):find("[%w%.%_]") do
-    endPosition = endPosition + 1
+  local nextChar = text:sub(cursorPosition, cursorPosition)
+  if nextChar ~= " " and nextChar ~= "\n" then
+    return "", nil, nil
   end
 
-  local currentWord = text:sub(startPosition, endPosition)
-  return currentWord, startPosition, endPosition
+  local currentWord = text:sub(startPosition, cursorPosition)
+  return currentWord, startPosition, cursorPosition
 end
 
 ---@param editbox EditBox
@@ -344,4 +389,12 @@ function APIAutoCompleteLineMixin:Init(elementData)
   self.button:SetScript("OnClick", OnClickCallback)
   self.button:SetScript("OnEnter", showTooltip)
   self.button:SetScript("OnLeave", hideTooltip)
+end
+
+function APIAutoCompleteLineMixin:SetSelected(selected)
+  self.button:SetText(selected and ("> " .. self.name) or self.name)
+end
+
+function APIAutoCompleteLineMixin:Insert()
+  OnClickCallback(self.button)
 end
