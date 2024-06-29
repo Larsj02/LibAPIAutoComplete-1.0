@@ -40,7 +40,11 @@ local function Init()
   scrollBar:Hide()
 
   local view = CreateScrollBoxListLinearView()
-  view:SetElementInitializer("APIAutoCompleteLineTemplate", function(frame, elementData)
+  view:SetElementExtentCalculator(function(dataIndex, elementData)
+    return 20
+  end)
+  view:SetElementInitializer("button", function(frame, elementData)
+    Mixin(frame, APIAutoCompleteLineMixin)
     frame:Init(elementData)
   end)
   ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
@@ -253,7 +257,7 @@ function lib:UpdateWidget(editbox)
     self.scrollBox:SetParent(editbox)
     self.scrollBar:SetParent(editbox)
     self.scrollBox:ForEachFrame(function(frame)
-      frame.button:SetNormalFontObject(fontObject)
+      frame:SetNormalFontObject(fontObject)
     end)
     self.scrollBox:Show()
     self.scrollBar:SetShown(lines > maxLinesShown)
@@ -263,12 +267,12 @@ function lib:UpdateWidget(editbox)
 end
 
 local function OnClickCallback(self)
-  local editbox = self:GetParent():GetParent():GetParent():GetParent()
+  local editbox = self:GetParent():GetParent():GetParent()
   local name
   if IndentationLib then
-    name = IndentationLib.stripWowColors(self:GetParent().name)
+    name = IndentationLib.stripWowColors(self.name)
   elseif WowLua and WowLua.indent then
-    name = WowLua.indent.stripWowColors(self:GetParent().name)
+    name = WowLua.indent.stripWowColors(self.name)
   end
   lib:SetWord(editbox, name)
 end
@@ -385,16 +389,16 @@ function APIAutoCompleteLineMixin:Init(elementData)
   self.name = elementData.name
   self.editor = elementData.editor
   self.apiInfo = elementData.apiInfo
-  self.button:SetText(elementData.name)
-  self.button:SetScript("OnClick", OnClickCallback)
-  self.button:SetScript("OnEnter", showTooltip)
-  self.button:SetScript("OnLeave", hideTooltip)
+  self:SetText(elementData.name)
+  self:SetScript("OnClick", OnClickCallback)
+  self:SetScript("OnEnter", showTooltip)
+  self:SetScript("OnLeave", hideTooltip)
 end
 
 function APIAutoCompleteLineMixin:SetSelected(selected)
-  self.button:SetText(selected and ("> " .. self.name) or self.name)
+  self:SetText(selected and ("> " .. self.name) or self.name)
 end
 
 function APIAutoCompleteLineMixin:Insert()
-  OnClickCallback(self.button)
+  OnClickCallback(self)
 end
