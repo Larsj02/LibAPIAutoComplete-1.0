@@ -316,7 +316,7 @@ function lib:GetWord(editbox)
   end
 
   local nextChar = text:sub(cursorPosition, cursorPosition)
-  if nextChar ~= " " and nextChar ~= "\n" then
+  if nextChar ~= "" and nextChar ~= " " and nextChar ~= "\n" then
     return "", nil, nil
   end
 
