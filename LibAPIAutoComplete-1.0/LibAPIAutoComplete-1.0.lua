@@ -56,7 +56,11 @@ local function Init()
     if selected and lib.editbox then
       local maxLinesShown = config[lib.editbox].maxLinesShown
       local index = lib.data:FindIndex(elementData)
-      local percent = (index - maxLinesShown / 2)  / (lib.data:GetSize() - maxLinesShown)
+      local divisor = lib.data:GetSize() - maxLinesShown
+      if divisor == 0 then
+        divisor = 1
+      end
+      local percent = (index - maxLinesShown / 2) / divisor
       if percent < 0 then
         percent = 0
       elseif percent > 1 then
