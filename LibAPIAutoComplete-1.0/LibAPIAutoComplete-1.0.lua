@@ -310,13 +310,18 @@ function lib:GetWord(editbox)
   end
 
   -- get end position of current word
+  local endPosition = startPosition
+  while endPosition + 1 < #text and text:sub(endPosition + 1, endPosition + 1):find("[%w%.%_]") do
+    endPosition = endPosition + 1
+  end
+
   local nextChar = text:sub(cursorPosition, cursorPosition)
   if nextChar ~= " " and nextChar ~= "\n" then
     return "", nil, nil
   end
 
-  local currentWord = text:sub(startPosition, cursorPosition)
-  return currentWord, startPosition, cursorPosition
+  local currentWord = text:sub(startPosition, endPosition)
+  return currentWord, startPosition, endPosition
 end
 
 ---@param editbox EditBox
