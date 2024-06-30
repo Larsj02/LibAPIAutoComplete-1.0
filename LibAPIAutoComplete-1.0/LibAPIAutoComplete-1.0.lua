@@ -102,6 +102,8 @@ local function Init()
   end)
 end
 
+local lastPosition
+
 ---@private
 ---@param editbox EditBox
 ---@param x number
@@ -109,15 +111,19 @@ end
 ---@param w number
 ---@param h number
 local function OnCursorChanged(editbox, x, y, w, h)
-  lib.scrollBox:Hide()
-  lib.scrollBar:Hide()
-  lib.scrollBox:ClearAllPoints()
-  lib.scrollBox:SetPoint("TOPLEFT", editbox, "TOPLEFT", x, y - h)
-  local currentWord = lib:GetWord(editbox)
-  if #currentWord > 4 then
-    lib:Search(currentWord)
-    lib:UpdateWidget(editbox)
+  local cursorPosition = editbox:GetCursorPosition()
+  if cursorPosition ~= lastPosition then
+    lib.scrollBox:Hide()
+    lib.scrollBar:Hide()
+    lib.scrollBox:ClearAllPoints()
+    lib.scrollBox:SetPoint("TOPLEFT", editbox, "TOPLEFT", x, y - h)
+    local currentWord = lib:GetWord(editbox)
+    if #currentWord > 4 then
+      lib:Search(currentWord)
+      lib:UpdateWidget(editbox)
+    end
   end
+  lastPosition = cursorPosition
 end
 
 ---@class Color
