@@ -176,53 +176,57 @@ function lib:disable(editbox)
   editbox.APIDoc_oldOnCursorChanged = nil
 end
 
+function lib:addLine(apiInfo)
+  local name
+  if apiInfo.Type == "System" then
+    name = apiInfo.Namespace
+  elseif apiInfo.Type == "Function" then
+    name = apiInfo:GetFullName()
+  elseif apiInfo.Type == "Event" then
+    name = apiInfo.LiteralName
+  end
+  self.data:Insert({ name = name, apiInfo = apiInfo })
+end
+
 ---Search a word in documentation, set results in lib.data
 ---@param word string
 function lib:Search(word)
   self.data:Flush()
   if word and #word > 3 then
-    local results = {}
-
-    -- if search field is set to the name of namespace, show all functions
-    local foundSystem = false
     local lowerWord = word:lower();
+    local nsName, rest = lowerWord:match("^([%w%_]+)(.*)")
+    local funcName = rest and rest:match("^%.([%w%_]+)")
     for _, systemInfo in ipairs(APIDocumentation.systems) do
-      -- search for namespaceName or namespaceName.functionName
-      local nsName, rest = lowerWord:match("^([%w%_]+)(.*)")
-      if nsName and systemInfo.Namespace and systemInfo.Namespace:lower():match(nsName) then
-        foundSystem = true
-        local funcName = rest and rest:match("^%.([%w%_]+)")
-        for _, apiInfo in ipairs(systemInfo.Functions) do
+      local systemMatch = nsName and #nsName >= 4
+        and systemInfo.Namespace and systemInfo.Namespace:lower():match(nsName)
+
+      for _, apiInfo in ipairs(systemInfo.Functions) do
+        if systemMatch then
           if funcName then
             if apiInfo:MatchesSearchString(funcName) then
-              tinsert(results, apiInfo)
+              self:addLine(apiInfo)
             end
           else
-            tinsert(results, apiInfo)
+            self:addLine(apiInfo)
           end
-        end
-        if rest == "" then
-          for _, apiInfo in ipairs(systemInfo.Events) do
-            tinsert(results, apiInfo)
+        else
+          if apiInfo:MatchesSearchString(lowerWord) then
+            self:addLine(apiInfo)
           end
         end
       end
-    end
 
-    -- otherwise show a list of functions matching search field
-    if not foundSystem then
-      APIDocumentation:AddAllMatches(APIDocumentation.functions, results, lowerWord)
-      APIDocumentation:AddAllMatches(APIDocumentation.events, results, lowerWord)
-    end
-
-    for i, apiInfo in ipairs(results) do
-      local name
-      if apiInfo.Type == "Function" then
-        name = apiInfo:GetFullName()
-      elseif apiInfo.Type == "Event" then
-        name = apiInfo.LiteralName
+      if systemMatch and rest == "" then
+        for _, apiInfo in ipairs(systemInfo.Events) do
+          self:addLine(apiInfo)
+        end
+      else
+        for _, apiInfo in ipairs(systemInfo.Events) do
+          if apiInfo:MatchesSearchString(lowerWord) then
+            self:addLine(apiInfo)
+          end
+        end
       end
-      self.data:Insert({ name = name, apiInfo = apiInfo })
     end
   end
 end
@@ -232,7 +236,7 @@ function lib:ListSystems()
   self.data:Flush()
   for i, systemInfo in ipairs(APIDocumentation.systems) do
     if systemInfo.Namespace and #systemInfo.Functions > 0 then
-      self.data:Insert({ name = name, apiInfo = systemInfo })
+      self:addLine(systemInfo)
     end
   end
 end
