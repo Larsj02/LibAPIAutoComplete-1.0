@@ -387,11 +387,10 @@ function lib:SetWord(editbox, word)
 end
 
 local function showTooltip(self)
-  local apiInfo = self:GetParent().apiInfo
-  if apiInfo then
+  if self.apiInfo then
     GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 20, 20)
     GameTooltip:ClearLines()
-    for _, line in ipairs(apiInfo:GetDetailedOutputLines()) do
+    for _, line in ipairs(self.apiInfo:GetDetailedOutputLines()) do
       GameTooltip:AddLine(line)
     end
     GameTooltip:Show()
