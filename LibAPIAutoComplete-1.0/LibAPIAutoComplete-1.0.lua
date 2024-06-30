@@ -119,7 +119,7 @@ local function OnCursorChanged(editbox, x, y, w, h)
     lib.scrollBox:SetPoint("TOPLEFT", editbox, "TOPLEFT", x, y - h)
     local currentWord = lib:GetWord(editbox)
     if #currentWord > 4 then
-      lib:Search(currentWord)
+      lib:Search(currentWord, config[editbox])
       lib:UpdateWidget(editbox)
     end
   end
@@ -135,6 +135,9 @@ end
 ---@class Params
 ---@field backgroundColor Color?
 ---@field maxLinesShown integer?
+---@field disableFunctions boolean?
+---@field disableEvents boolean?
+---@field disableSystems boolean?
 
 ---Enable APIDoc widget on editbox
 ---ForAllIndentsAndPurpose replace GetText, APIDoc must be enabled before FAIAP
@@ -147,6 +150,9 @@ function lib:enable(editbox, params)
   config[editbox] = {
     backgroundColor = params and params.backgroundColor or {.3, .3, .3, .9},
     maxLinesShown = params and params.maxLinesShown or 7,
+    disableFunctions = params and params.disableFunctions or false,
+    disableEvents = params and params.disableEvents or false,
+    disableSystems = params and params.disableSystems or false,
   }
   Init()
   editbox.APIDoc_oldOnCursorChanged = editbox:GetScript("OnCursorChanged")
@@ -190,40 +196,46 @@ end
 
 ---Search a word in documentation, set results in lib.data
 ---@param word string
-function lib:Search(word)
+---@param config Params
+function lib:Search(word, config)
   self.data:Flush()
   if word and #word > 3 then
     local lowerWord = word:lower();
     local nsName, rest = lowerWord:match("^([%w%_]+)(.*)")
     local funcName = rest and rest:match("^%.([%w%_]+)")
     for _, systemInfo in ipairs(APIDocumentation.systems) do
-      local systemMatch = nsName and #nsName >= 4
-        and systemInfo.Namespace and systemInfo.Namespace:lower():match(nsName)
+      local systemMatch = (not config.disableSystems)
+        and (nsName and #nsName >= 4)
+        and (systemInfo.Namespace and systemInfo.Namespace:lower():match(nsName))
 
-      for _, apiInfo in ipairs(systemInfo.Functions) do
-        if systemMatch then
-          if funcName then
-            if apiInfo:MatchesSearchString(funcName) then
+      if not config.disableFunctions then
+        for _, apiInfo in ipairs(systemInfo.Functions) do
+          if systemMatch then
+            if funcName then
+              if apiInfo:MatchesSearchString(funcName) then
+                self:addLine(apiInfo)
+              end
+            else
               self:addLine(apiInfo)
             end
           else
-            self:addLine(apiInfo)
-          end
-        else
-          if apiInfo:MatchesSearchString(lowerWord) then
-            self:addLine(apiInfo)
+            if apiInfo:MatchesSearchString(lowerWord) then
+              self:addLine(apiInfo)
+            end
           end
         end
       end
 
-      if systemMatch and rest == "" then
-        for _, apiInfo in ipairs(systemInfo.Events) do
-          self:addLine(apiInfo)
-        end
-      else
-        for _, apiInfo in ipairs(systemInfo.Events) do
-          if apiInfo:MatchesSearchString(lowerWord) then
+      if not config.disableEvents then
+        if systemMatch and rest == "" then
+          for _, apiInfo in ipairs(systemInfo.Events) do
             self:addLine(apiInfo)
+          end
+        else
+          for _, apiInfo in ipairs(systemInfo.Events) do
+            if apiInfo:MatchesSearchString(lowerWord) then
+              self:addLine(apiInfo)
+            end
           end
         end
       end
