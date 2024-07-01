@@ -53,7 +53,9 @@ local function Init()
   local selectionBehaviour = ScrollUtil.AddSelectionBehavior(scrollBox, SelectionBehaviorFlags.Deselectable, SelectionBehaviorFlags.Intrusive)
   selectionBehaviour:RegisterCallback(SelectionBehaviorMixin.Event.OnSelectionChanged, function(o, elementData, selected)
     local elementFrame = scrollBox:FindFrame(elementData)
-    elementFrame:SetSelected(selected)
+    if elementFrame then
+      elementFrame:SetSelected(selected)
+    end
 
     if selected and lib.editbox and config[lib.editbox] then
       local maxLinesShown = config[lib.editbox].maxLinesShown
@@ -428,10 +430,17 @@ function APIAutoCompleteLineMixin:Init(elementData)
   fontString:SetFont(fontPath, 12, "")
   fontString:SetPoint("LEFT")
   fontString:SetTextColor(0.973, 0.902, 0.581)
+  if not self:GetHighlightTexture() then
+    local texture = self:CreateTexture()
+    texture:SetColorTexture(0.4,0.4,0.4,0.5)
+    texture:SetAllPoints()
+    self:SetHighlightTexture(texture)
+  end
+  self:SetSelected(false)
 end
 
 function APIAutoCompleteLineMixin:SetSelected(selected)
-  self:SetText(selected and ("> " .. self.name) or self.name)
+  self:SetHighlightLocked(selected)
 end
 
 function APIAutoCompleteLineMixin:Insert()
