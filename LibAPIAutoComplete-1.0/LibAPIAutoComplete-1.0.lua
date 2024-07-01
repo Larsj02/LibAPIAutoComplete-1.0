@@ -53,7 +53,7 @@ local function Init()
     local elementFrame = scrollBox:FindFrame(elementData)
     elementFrame:SetSelected(selected)
 
-    if selected and lib.editbox then
+    if selected and lib.editbox and config[lib.editbox] then
       local maxLinesShown = config[lib.editbox].maxLinesShown
       local index = lib.data:FindIndex(elementData)
       local divisor = lib.data:GetSize() - maxLinesShown
