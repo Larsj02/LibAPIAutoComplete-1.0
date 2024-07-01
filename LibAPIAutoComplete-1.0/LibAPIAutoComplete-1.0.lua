@@ -2,6 +2,8 @@ local MAJOR, MINOR = "LibAPIAutoComplete-1.0", 3
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
+local SharedMedia = LibStub("LibSharedMedia-3.0")
+
 local config = {}
 
 local function LoadBlizzard_APIDocumentation()
@@ -267,8 +269,8 @@ function lib:UpdateWidget(editbox)
     local height = math.min(lines, maxLinesShown) * 20
     local width = 0
     local hiddenString = editbox.APIDoc_hiddenString
-    local fontObject = editbox:GetFontObject()
-    hiddenString:SetFontObject(fontObject)
+    local fontPath = SharedMedia:Fetch("font", "Fira Mono Medium")
+    hiddenString:SetFont(fontPath, 12, "")
     for _, elementData in self.data:Enumerate() do
       hiddenString:SetText(elementData.name)
       width = math.max(width, hiddenString:GetStringWidth())
@@ -280,11 +282,10 @@ function lib:UpdateWidget(editbox)
     self.scrollBox.background:SetColorTexture(unpack(backgroundColor))
 
     -- show
-    self.scrollBox:SetParent(editbox)
-    self.scrollBar:SetParent(editbox)
-    self.scrollBox:ForEachFrame(function(frame)
-      frame:SetNormalFontObject(fontObject)
-    end)
+    self.scrollBox:SetParent(UIParent)
+    self.scrollBar:SetParent(UIParent)
+    self.scrollBox:SetFrameStrata("TOOLTIP")
+    self.scrollBar:SetFrameStrata("TOOLTIP")
     self.scrollBox:Show()
     self.scrollBar:SetShown(lines > maxLinesShown)
     self.selectionBehaviour:SelectFirstElementData()
@@ -293,14 +294,13 @@ function lib:UpdateWidget(editbox)
 end
 
 local function OnClickCallback(self)
-  local editbox = self:GetParent():GetParent():GetParent()
   local name
   if IndentationLib then
     name = IndentationLib.stripWowColors(self.name)
   elseif WowLua and WowLua.indent then
     name = WowLua.indent.stripWowColors(self.name)
   end
-  lib:SetWord(editbox, name)
+  lib:SetWord(lib.editbox, name)
 end
 
 ---@param editbox EditBox
@@ -417,7 +417,6 @@ end
 APIAutoCompleteLineMixin = {}
 function APIAutoCompleteLineMixin:Init(elementData)
   self.name = elementData.name
-  self.editor = elementData.editor
   self.apiInfo = elementData.apiInfo
   self:SetText(elementData.name)
   self:SetScript("OnClick", OnClickCallback)
@@ -425,8 +424,9 @@ function APIAutoCompleteLineMixin:Init(elementData)
   self:SetScript("OnLeave", hideTooltip)
   local fontString = self:GetFontString()
   fontString:ClearAllPoints()
+  local fontPath = SharedMedia:Fetch("font", "Fira Mono Medium")
+  fontString:SetFont(fontPath, 12, "")
   fontString:SetPoint("LEFT")
-  fontString:SetTextHeight(12)
   fontString:SetTextColor(0.973, 0.902, 0.581)
 end
 
