@@ -325,7 +325,7 @@ function lib:GetWord(editbox)
 
   -- get end position of current word
   local endPosition = startPosition
-  while endPosition + 1 < #text and text:sub(endPosition + 1, endPosition + 1):find("[%w%.%_]") do
+  while endPosition < #text and text:sub(endPosition + 1, endPosition + 1):find("[%w%.%_]") do
     endPosition = endPosition + 1
   end
 
@@ -356,7 +356,7 @@ function lib:SetWord(editbox, word)
 
   -- get end position of current word
   local endPosition = startPosition
-  while endPosition + 1 < #text and text:sub(endPosition + 1, endPosition + 1):find("[%w%.%_]") do
+  while endPosition < #text and text:sub(endPosition + 1, endPosition + 1):find("[%w%.%_]") do
     endPosition = endPosition + 1
   end
 
