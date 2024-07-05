@@ -138,6 +138,9 @@ local function OnCursorChanged(editbox, x, y, w, h)
     local currentWord = lib:GetWord(editbox)
     if #currentWord > 4 then
       lib:Search(currentWord, config[editbox])
+      if lib.data:GetSize() == 1 and lib.data:Find(1).name == currentWord then
+        lib.data:Flush()
+      end
       lib:UpdateWidget(editbox)
     end
   end
