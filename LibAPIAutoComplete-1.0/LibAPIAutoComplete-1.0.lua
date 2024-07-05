@@ -320,6 +320,7 @@ local function OnClickCallback(self)
     name = WowLua.indent.stripWowColors(self.name)
   end
   lib:SetWord(lib.editbox, name)
+  lib.editbox:SetFocus()
 end
 
 ---@param editbox EditBox
