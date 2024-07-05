@@ -31,6 +31,11 @@ local function LoadBlizzard_APIDocumentation()
   end
 end
 
+function lib:Hide()
+  self.scrollBox:Hide()
+  self.scrollBar:Hide()
+end
+
 ---Create APIDoc widget and ensure Blizzard_APIDocumentation is loaded
 local isInit = false
 local function Init()
@@ -131,8 +136,7 @@ local lastPosition
 local function OnCursorChanged(editbox, x, y, w, h)
   local cursorPosition = editbox:GetCursorPosition()
   if cursorPosition ~= lastPosition then
-    lib.scrollBox:Hide()
-    lib.scrollBar:Hide()
+    lib:Hide()
     lib.scrollBox:ClearAllPoints()
     lib.scrollBox:SetPoint("TOPLEFT", editbox, "TOPLEFT", x, y - h)
     local currentWord = lib:GetWord(editbox)
@@ -188,6 +192,9 @@ function lib:enable(editbox, params)
   editbox:SetScript("OnCursorChanged", function(...)
     editbox.APIDoc_oldOnCursorChanged(...)
     OnCursorChanged(...)
+  end)
+  editbox:SetScript("OnHide", function(...)
+    lib:Hide()
   end)
   editbox.APIDoc_hiddenString = editbox:CreateFontString()
 end
@@ -278,8 +285,7 @@ end
 ---@param editbox EditBox
 function lib:UpdateWidget(editbox)
   if self.data:IsEmpty() then
-    self.scrollBox:Hide()
-    self.scrollBar:Hide()
+    self:Hide()
     self.editbox = nil
   else
     -- fix size
@@ -320,6 +326,7 @@ local function OnClickCallback(self)
     name = WowLua.indent.stripWowColors(self.name)
   end
   lib:SetWord(lib.editbox, name)
+  lib:Hide()
   lib.editbox:SetFocus()
 end
 
