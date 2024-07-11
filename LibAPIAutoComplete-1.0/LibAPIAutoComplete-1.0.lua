@@ -118,14 +118,25 @@ local function Init()
   scrollBox:SetScript("OnKeyDown", function(self, key)
     if key == "DOWN" then
       lib.scrollBox:SetPropagateKeyboardInput(false)
-      self.selectionBehaviour:SelectNextElementData()
+      if not self.selectionBehaviour:HasSelection() then
+        self.selectionBehaviour:SelectFirstElementData()
+      else
+        self.selectionBehaviour:SelectNextElementData()
+      end
     elseif key == "UP" then
-      self.selectionBehaviour:SelectPreviousElementData()
-    elseif key == "ENTER" and not IsModifierKeyDown() then
       lib.scrollBox:SetPropagateKeyboardInput(false)
+      if not self.selectionBehaviour:HasSelection() then
+        self.selectionBehaviour:SelectFirstElementData()
+      else
+        self.selectionBehaviour:SelectPreviousElementData()
+      end
+    elseif key == "ENTER" and not IsModifierKeyDown() then
       local selectedElementData = self.selectionBehaviour:GetFirstSelectedElementData()
-      local elementFrame = scrollBox:FindFrame(selectedElementData)
-      elementFrame:Insert()
+      if selectedElementData then
+        lib.scrollBox:SetPropagateKeyboardInput(false)
+        local elementFrame = scrollBox:FindFrame(selectedElementData)
+        elementFrame:Insert()
+      end
     elseif key == "ESCAPE" then
       lib.scrollBox:SetPropagateKeyboardInput(false)
       lib.data:Flush()
@@ -328,7 +339,6 @@ function lib:UpdateWidget(editbox)
     self.scrollBar:SetFrameStrata("TOOLTIP")
     self.scrollBox:Show()
     self.scrollBar:SetShown(lines > maxLinesShown)
-    self.selectionBehaviour:SelectFirstElementData()
     self.editbox = editbox
   end
 end
