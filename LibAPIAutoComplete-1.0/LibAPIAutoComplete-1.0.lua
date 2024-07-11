@@ -108,7 +108,7 @@ local function Init()
       self.selectionBehaviour:SelectNextElementData()
     elseif key == "UP" then
       self.selectionBehaviour:SelectPreviousElementData()
-    elseif key == "ENTER" then
+    elseif key == "ENTER" and not IsModifierKeyDown() then
       lib.scrollBox:SetPropagateKeyboardInput(false)
       local selectedElementData = self.selectionBehaviour:GetFirstSelectedElementData()
       local elementFrame = scrollBox:FindFrame(selectedElementData)
