@@ -9,7 +9,15 @@ local config = {}
 local skipWords = {
   ["local"] = true,
   ["print"] = true,
+  ["player"] = true,
+  ["display"] = true,
 }
+
+for k in pairs(skipWords) do
+  for i = #k, 5, -1 do
+     skipWords[k:sub(1, i)] = true
+  end
+end
 
 local function LoadBlizzard_APIDocumentation()
   local apiAddonName = "Blizzard_APIDocumentation"
