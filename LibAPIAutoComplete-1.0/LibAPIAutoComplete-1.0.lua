@@ -180,7 +180,6 @@ function lib:enable(editbox, params)
     disableSystems = params and params.disableSystems or false,
   }
   Init()
-  editbox.APIDoc_oldOnCursorChanged = editbox:GetScript("OnCursorChanged")
   -- hack for WeakAuras
   editbox.APIDoc_originalGetText = editbox.GetText
   -- hack for WowLua
@@ -189,8 +188,11 @@ function lib:enable(editbox, params)
       return WowLua.indent.coloredGetText(editbox)
     end
   end
+  editbox.APIDoc_oldOnCursorChanged = editbox:GetScript("OnCursorChanged")
   editbox:SetScript("OnCursorChanged", function(...)
-    editbox.APIDoc_oldOnCursorChanged(...)
+    if editbox.APIDoc_oldOnCursorChanged then
+      editbox.APIDoc_oldOnCursorChanged(...)
+    end
     OnCursorChanged(...)
   end)
   editbox:SetScript("OnHide", function(...)
