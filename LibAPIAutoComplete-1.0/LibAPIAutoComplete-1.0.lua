@@ -6,6 +6,11 @@ local SharedMedia = LibStub("LibSharedMedia-3.0")
 
 local config = {}
 
+local skipWords = {
+  ["local"] = true,
+  ["print"] = true,
+}
+
 local function LoadBlizzard_APIDocumentation()
   local apiAddonName = "Blizzard_APIDocumentation"
   local _, loaded = C_AddOns.IsAddOnLoaded(apiAddonName)
@@ -140,7 +145,7 @@ local function OnCursorChanged(editbox, x, y, w, h)
     lib.scrollBox:ClearAllPoints()
     lib.scrollBox:SetPoint("TOPLEFT", editbox, "TOPLEFT", x, y - h)
     local currentWord = lib:GetWord(editbox)
-    if #currentWord > 4 then
+    if #currentWord > 4 and not skipWords[currentWord] then
       lib:Search(currentWord, config[editbox])
       if lib.data:GetSize() == 1 and lib.data:Find(1).name == currentWord then
         lib.data:Flush()
