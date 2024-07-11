@@ -13,6 +13,8 @@ local skipWords = {
   ["display"] = true,
 }
 
+local maxMatches = 100
+
 for k in pairs(skipWords) do
   for i = #k, 5, -1 do
      skipWords[k:sub(1, i)] = true
@@ -292,6 +294,10 @@ function lib:Search(word, config)
             end
           end
         end
+      end
+
+      if self.data:GetSize() > maxMatches then
+        break
       end
     end
   end
