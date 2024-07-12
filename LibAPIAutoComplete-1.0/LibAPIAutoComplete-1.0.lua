@@ -11,6 +11,7 @@ local skipWords = {
   ["print"] = true,
   ["player"] = true,
   ["display"] = true,
+  ["return"] = true,
 }
 
 local maxMatches = 100
