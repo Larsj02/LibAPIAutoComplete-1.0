@@ -452,6 +452,11 @@ function lib:SetWord(editbox, word)
   -- replace word
   text = text:sub(1, startPosition - 1) .. word .. text:sub(endPosition + 1, #text)
   editbox:SetText(text)
+  -- SetText triggers the OnTextChanged handler without the "userInput" flag. We need that flag set to true, so run the handler again
+  local script = editbox:GetScript("OnTextChanged")
+  if script then
+    script(editbox, true)
+  end
 
   -- move cursor at end of word or start of parenthese
   local parenthesePosition = word:find("%(")
