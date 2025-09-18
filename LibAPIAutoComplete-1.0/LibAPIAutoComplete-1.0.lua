@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibAPIAutoComplete-1.0", 5
+local MAJOR, MINOR = "LibAPIAutoComplete-1.0", 6
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -269,7 +269,12 @@ function lib:addLine(apiInfo)
   elseif apiInfo.Type == "Event" then
     name = apiInfo.LiteralName
   end
-  self.data:Insert({ name = name, apiInfo = apiInfo })
+  self.data:InsertInternal({ name = name, apiInfo = apiInfo })
+end
+
+function lib:TriggerDataUpdate()
+  self.data:TriggerEvent(self.data.Event.OnSizeChanged, self.data:HasSortComparator())
+  self.data:Sort()
 end
 
 ---Search a word in documentation, set results in lib.data
@@ -322,6 +327,7 @@ function lib:Search(word, config)
         break
       end
     end
+    self:TriggerDataUpdate()
   end
 end
 
@@ -333,6 +339,7 @@ function lib:ListSystems()
       self:addLine(systemInfo)
     end
   end
+  self:TriggerDataUpdate()
 end
 
 ---Hide, or Show and fill APIDoc widget, using lib.data data
